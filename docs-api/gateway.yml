@@ -1,0 +1,180 @@
+swagger: '2.0'
+info:
+  description: >-
+    This is the api gateway for the OpenBrisk serverless functions framework.
+    You can find out  mor about OpenBrisk at [http://openbrisk.org](http://openbrisk.org).
+  version: 1.0.0
+  title: OpenBrisk API Gateway
+  contact:
+    email: info@openbrisk.org
+  license:
+    name: MIT
+basePath: /v1
+schemes:
+  - http
+paths:
+  /functions:
+    get:
+      summary: Retrieve infos about the deployed functions.
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: The list of deployed functions.
+          examples:
+            application/json: >-
+              [
+                { 
+                  "id": "d86fecf11f1c401cb5ef8905e7026458"
+                  "name": "hello_world",
+                  "namespace": "openbrisk",
+                  "runtime": "openbrisk/openbrisk-runtime-dotnet:v1.0.0",
+                  "version": 1,
+                  "replicas": 3,
+                  "invocations": 42
+                }
+              ]
+    post:
+      summary: Deploy a new function.
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: The function to deploy.
+          required: true
+          schema:
+            $ref: '#/definitions/Function'
+        responses:
+          '200':
+            description: OK
+          '400':
+            description: Bad Request
+  '/functions/{id}':
+    put:
+      summary:  Deploy an update to an existing function.
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: The id of the function to update.
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: body
+          description: The function to update.
+          required: true
+          schema:
+            $ref: '#/definitions/Function'    
+      responses:
+        '200':
+          descriptopn: OK
+        '400':
+          description: Bad Request
+        '404':
+          description: The function was not found.
+    delete:
+      summary: Remove an existing function.
+      description: ''
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: The id of the function to delete.
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+        '404':
+          description: Function Not Found
+  '/functions/{namespace}/{name}':
+    post:
+      summary: Invoke a deployed function.
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: namespace
+          description: The namespace the function is located in.
+          required: true
+          type: string
+        - in: path
+          name: name
+          description: The name of the function to invoke.
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: The call mode of the function and the optional data passed to the function.
+          required: true
+          schema:
+            $ref: '#/definitions/FunctionInvocation'                 
+      responses:
+        '200':
+          description: OK
+        '202':
+          description: Accepted
+        '400':
+          description: Bad Request
+        '404':
+          description: Function Not Found
+        '500':
+          description: Internal Function Error
+definitions:
+  Function:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the function.
+        required: true
+      namespace:
+        type: string
+        description: (Optional) The namespace of the function.
+        required: false
+        default: openbrisk
+      function:
+        type: string
+        format: base64
+        description: The code file of the function, base64 encoded.
+        required: true
+      dependencies:
+        type: string
+        format: base64
+        description: (Optional) The file containing the dependencies of the function, base64 encoded.
+        required: false
+  FunctionInvocation:
+    type: object
+    properties:
+      async:
+        type: boolean
+        description: (Optional) The async call mode of the function invocation.
+        required: true
+        default: false
+      data:
+        type: object
+        description: (Optional) The data passed to the function.
+        required: false
+        default: null
+externalDocs:
+  description: OpenBrisk documentation available on GitHub
+  url: https://github.com/openbrisk/brisk
