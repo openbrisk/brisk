@@ -51,11 +51,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Function'
-        responses:
-          '200':
-            description: OK
-          '400':
-            description: Bad Request
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
   '/functions/{id}':
     put:
       summary:  Deploy an update to an existing function.
@@ -79,7 +79,7 @@ paths:
             $ref: '#/definitions/Function'    
       responses:
         '200':
-          descriptopn: OK
+          description: OK
         '400':
           description: Bad Request
         '404':
@@ -142,38 +142,37 @@ paths:
 definitions:
   Function:
     type: object
+    required:
+      - name
+      - function
     properties:
       name:
         type: string
         description: The name of the function.
-        required: true
       namespace:
         type: string
         description: (Optional) The namespace of the function.
-        required: false
         default: openbrisk
       function:
         type: string
         format: base64
         description: The code file of the function, base64 encoded.
-        required: true
       dependencies:
         type: string
         format: base64
         description: (Optional) The file containing the dependencies of the function, base64 encoded.
-        required: false
   FunctionInvocation:
     type: object
+    required:
+      - async
     properties:
       async:
         type: boolean
         description: (Optional) The async call mode of the function invocation.
-        required: true
         default: false
       data:
         type: object
         description: (Optional) The data passed to the function.
-        required: false
         default: null
 externalDocs:
   description: OpenBrisk documentation available on GitHub
