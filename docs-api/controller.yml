@@ -20,7 +20,7 @@ paths:
         - application/json
       responses:
         '200':
-          description: The list of deployed functions.
+          description: OK
           examples:
             application/json: |-
               [
