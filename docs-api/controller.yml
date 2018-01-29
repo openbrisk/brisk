@@ -1,2 +1,249 @@
-swagger: "2.0"
-swagger: "2.0"
+swagger: '2.0'
+info:
+  description: >-
+    This is the functions controller for the OpenBrisk serverless functions framework.
+    You can find out more about OpenBrisk at [http://openbrisk.org](http://openbrisk.org).
+  version: 1.0.0
+  title: OpenBrisk Functions Controller
+  contact:
+    email: info@openbrisk.org
+  license:
+    name: MIT
+basePath: /controller/v1
+schemes:
+  - http
+paths:
+  '/functions':
+    get:
+      summary: Get a list of infos about the deployed functions.
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: The list of deployed functions.
+          examples:
+            application/json: |-
+              [
+                { 
+                  "name": "hello_world",
+                  "namespace": "openbrisk",
+                  "runtime": "openbrisk/openbrisk-runtime-dotnet:v1.0.0",
+                  "version": 23,
+                  "replicas": 3,
+                  "invocations": 42
+                }
+              ]
+    post:
+      summary: Deploy a new function in the namespace.
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: The function to deploy.
+          required: true
+          schema:
+            $ref: '#/definitions/FunctionDescriptor'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+    put:
+      summary:  Deploy an update to an existing function.
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: The function to update.
+          required: true
+          schema:
+            $ref: '#/definitions/FunctionDescriptor'    
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '404':
+          description: Function Not Found
+  '/functions/{namespaceName}':
+    get:
+      summary: Get a list of infos about the deployed functions in the namespace.
+      description: ''
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: namespaceName
+          description: The namespace the functions are located in.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: The list of deployed functions.
+          examples:
+            application/json: |-
+              [
+                { 
+                  "name": "hello_world",
+                  "namespace": "openbrisk",
+                  "runtime": "openbrisk/openbrisk-runtime-dotnet:v1.0.0",
+                  "version": 23,
+                  "replicas": 3,
+                  "invocations": 42
+                }
+              ]
+        '404':
+          description: Namespace Not Found
+  '/functions/{namespaceName}/{functionName}':
+    get:
+      summary: Get info about a specific function.
+      description: ''
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: namespaceName
+          description: The namespace the function is located in.
+          required: true
+          type: string      
+        - in: path
+          name: functionName
+          description: The name of the function.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: The deployed functions.
+          examples:
+            application/json: |-
+                { 
+                  "name": "hello_world",
+                  "namespace": "openbrisk",
+                  "runtime": "openbrisk/openbrisk-runtime-dotnetcore:v1.0.0",
+                  "version": 23,
+                  "replicaCount": 3,
+                  "invocationCount": 42
+                }
+        '404':
+          description: Function Not Found | Namespace Not Found     
+    delete:
+      summary: Remove an existing function.
+      description: ''
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: namespaceName
+          description: The namespace the function is located in.
+          required: true
+          type: string      
+        - in: path
+          name: functionName
+          description: The name of the function.
+          required: true
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+        '404':
+          description: Function Not Found
+  '/namespaces':
+    get:
+      summary: Get a list of available namespaces.
+      description: ''
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          examples:
+            application/json: |-
+                [
+                  "openbrisk",
+                  "my-namespace"
+                ]
+    post:
+      summary: Create a new namespace.
+      description: ''
+      consumes:
+        - text/plain
+      parameters:
+        - in: body
+          name: body
+          description: The namespace to create.
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+  '/namespaces/{namespaceName}':
+    get:
+      summary: Get info about a namespace.
+      description: ''
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: namespaceName
+          description: The namespace to get the info for.
+          required: true
+          type: string        
+      responses:
+        '200':
+          description: OK
+          examples: 
+            application/json: |-
+              {
+                "name": "openbrisk",
+                "functionCount": 10
+              }
+        '404': 
+          description: Namespace Not Found
+definitions:
+  FunctionDescriptor:
+    type: object
+    required:
+      - name
+      - code
+      - runtime
+    properties:
+      name:
+        type: string
+        description: The name of the function.
+      namespace:
+        type: string
+        description: (Optional) The namespace of the function.
+        default: openbrisk
+      runtime:
+        type: string
+        description: The runtime to use for the function.        
+      code:
+        type: string
+        description: The code of the function.
+      dependencies:
+        type: string
+        description: (Optional) The dependencies of the function.
+      image:
+        type: string
+        description: (Optional) A custom brisk runtime docker image.
+      registry:
+        type: string
+        description: >-
+          (Optional) The base64-encoded basic auth credentials for a private
+          docker image registry.
+externalDocs:
+  description: OpenBrisk documentation available on GitHub.
+  url: https://github.com/openbrisk/brisk          

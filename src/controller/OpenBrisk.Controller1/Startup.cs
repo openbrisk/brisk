@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Converters;
 
-namespace OpenBrisk.Gateway
+namespace Openbrisk.Controller
 {
 	public class Startup
 	{

@@ -1,6 +1,6 @@
 ﻿namespace Openbrisk.Controller.Model
 {
-	public class Function
+	public class FunctionInfo
 	{
 		/// <summary>
 		/// Gets or sets the name of the function.
