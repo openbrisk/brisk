@@ -1,4 +1,4 @@
-﻿namespace Openbrisk.Controller.Model
+﻿namespace OpenBrisk.Controller.Model
 {
 	using System.ComponentModel.DataAnnotations;
 

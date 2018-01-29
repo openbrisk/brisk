@@ -1,4 +1,4 @@
-﻿namespace Openbrisk.Controller.Model
+﻿namespace OpenBrisk.Controller.Model
 {
 	public class FunctionInfo
 	{

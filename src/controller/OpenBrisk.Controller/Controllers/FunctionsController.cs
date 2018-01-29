@@ -1,9 +1,9 @@
-﻿namespace Openbrisk.Controller.Controllers
+﻿namespace OpenBrisk.Controller.Controllers
 {
 	using System.Collections.Generic;
 	using System.Threading.Tasks;
 	using Microsoft.AspNetCore.Mvc;
-	using Openbrisk.Controller.Model;
+	using OpenBrisk.Controller.Model;
 
 	[Route("controller/v1")]
 	public class FunctionsController : Controller
