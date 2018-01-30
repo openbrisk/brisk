@@ -63,7 +63,6 @@ definitions:
         default: false
       data:
         type: string
-        format: application/json
         description: (Optional) The data passed to the function.
         default: ''
 externalDocs:
