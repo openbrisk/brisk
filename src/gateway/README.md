@@ -4,6 +4,6 @@ The API gateway provides access to the functions deployed on the Kubernetes clus
 
 ## Features
 
--  Invoke deployed functions
--  Autoscaled using Kubernetes Deployment
--  Accessible via REST API
+- Invoke deployed functions
+- Autoscaled using Kubernetes Deployment
+- Accessible via REST API
