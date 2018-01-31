@@ -12,6 +12,6 @@
 		/// Gets or sets the function count of the namespace.
 		/// </summary>
 		/// <value>The function count.</value>
-		public ulong FunctionCount { get; set; }
+		public int FunctionCount { get; set; }
 	}
 }

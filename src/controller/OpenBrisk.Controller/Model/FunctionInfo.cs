@@ -24,18 +24,18 @@
 		/// Gets or sets the version of the function.
 		/// </summary>
 		/// <value>The version.</value>
-		public ulong Version { get; set; }
+		public int Version { get; set; }
 
 		/// <summary>
 		/// Gets or sets the replica count of the function.
 		/// </summary>
 		/// <value>The replica count.</value>
-		public ulong ReplicaCount { get; set; }
+		public int ReplicaCount { get; set; }
 
 		/// <summary>
 		/// Gets or sets the invocation count of the function.
 		/// </summary>
 		/// <value>The invocation count.</value>
-		public ulong InvocationCount { get; set; }
+		public int InvocationCount { get; set; }
 	}
 }

@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Converters;
-
-namespace OpenBrisk.Controller
+﻿namespace OpenBrisk.Controller
 {
+	using k8s;
+	using Microsoft.AspNetCore.Builder;
+	using Microsoft.AspNetCore.Hosting;
+	using Microsoft.Extensions.Configuration;
+	using Microsoft.Extensions.DependencyInjection;
+	using Newtonsoft.Json.Converters;
+
 	public class Startup
 	{
 		public Startup(IConfiguration configuration)
 		{
-			Configuration = configuration;
+			this.Configuration = configuration;
 		}
 
 		public IConfiguration Configuration { get; }
@@ -24,6 +19,12 @@ namespace OpenBrisk.Controller
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddSingleton<IKubernetes>(serviceLocator =>
+			{
+				KubernetesClientConfiguration config = KubernetesClientConfiguration.InClusterConfig();
+				return new Kubernetes(config);
+			});
+
 			services.AddMvc()
 					.AddJsonOptions(setup =>
 					{

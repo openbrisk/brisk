@@ -61,6 +61,10 @@ definitions:
         type: boolean
         description: (Optional) The async call mode of the function invocation.
         default: false
+      callback:
+        type: string
+        format: url
+        description: (Optional) A callback url where the result of the function is posted to.
       data:
         type: string
         description: (Optional) The data passed to the function.

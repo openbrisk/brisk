@@ -1,13 +1,24 @@
 ﻿namespace OpenBrisk.Controller.Controllers
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Threading.Tasks;
+	using k8s;
+	using k8s.Models;
 	using Microsoft.AspNetCore.Mvc;
 	using OpenBrisk.Controller.Model;
 
 	[Route("controller/v1")]
 	public class FunctionsController : Controller
 	{
+		private readonly IKubernetes kubernetesClient;
+
+		public FunctionsController(IKubernetes kubernetesClient)
+		{
+			this.kubernetesClient = kubernetesClient;
+		}
+
 		/// <summary>
 		/// Get a list of infos about the deployed functions.
 		/// </summary>
@@ -15,7 +26,17 @@
 		[HttpGet("functions")]
 		public async Task<IActionResult> GetFunctions()
 		{
-			return this.Ok(new List<FunctionInfo>());
+			Corev1ServiceList services = await this.kubernetesClient.ListServiceForAllNamespacesAsync(labelSelector: "application=openbrisk");
+
+			return this.Ok(services.Items.Select(x => new FunctionInfo
+			{
+				Name = x.Metadata.Name,
+				Namespace = x.Metadata.NamespaceProperty,
+				Runtime = "",
+				Version = 0,
+				ReplicaCount = x.Spec.Ports.Count,
+				InvocationCount = 0,
+			}));
 		}
 
 		/// <summary>
@@ -26,7 +47,17 @@
 		[HttpGet("functions/{namespaceName}")]
 		public async Task<IActionResult> GetFunctions([FromRoute]string namespaceName)
 		{
-			return this.Ok(new List<FunctionInfo>());
+			Corev1ServiceList services = await this.kubernetesClient.ListNamespacedServiceAsync(namespaceName, labelSelector: "application=openbrisk");
+
+			return this.Ok(services.Items.Select(x => new FunctionInfo
+			{
+				Name = x.Metadata.Name,
+				Namespace = x.Metadata.NamespaceProperty,
+				Runtime = "",
+				Version = 0,
+				ReplicaCount = x.Spec.Ports.Count,
+				InvocationCount = 0,
+			}));
 		}
 
 		/// <summary>
@@ -36,7 +67,7 @@
 		/// <param name="namespaceName">The namespace name.</param>
 		/// <param name="functionName">The function name.</param>
 		[HttpGet("functions/{namespaceName}/{functionName}")]
-		public async Task<IActionResult> GetFunctions([FromRoute]string namespaceName, [FromRoute]string functionName)
+		public async Task<IActionResult> GetFunction([FromRoute]string namespaceName, [FromRoute]string functionName)
 		{
 			return this.Ok(new FunctionInfo());
 		}

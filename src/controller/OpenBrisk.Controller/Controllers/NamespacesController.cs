@@ -1,13 +1,23 @@
 ﻿namespace OpenBrisk.Controller.Controllers
 {
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Threading.Tasks;
+	using k8s;
+	using k8s.Models;
 	using Microsoft.AspNetCore.Mvc;
 	using OpenBrisk.Controller.Model;
 
 	[Route("controller/v1")]
 	public class NamespacesController : Controller
 	{
+		private readonly IKubernetes kubernetesClient;
+
+		public NamespacesController(IKubernetes kubernetesClient)
+		{
+			this.kubernetesClient = kubernetesClient;
+		}
+
 		/// <summary>
 		/// Get a list of available namespaces.
 		/// </summary>
@@ -15,27 +25,38 @@
 		[HttpGet("namespaces")]
 		public async Task<IActionResult> GetNamespaces()
 		{
-			return this.Ok(new List<string>());
+			Corev1NamespaceList namespaces = await this.kubernetesClient.ListNamespaceAsync(labelSelector: "application=openbrisk");
+			return this.Ok(namespaces.Items.Select(x => x.Metadata.Name));
 		}
 
 		/// <summary>
 		/// Get info about a namespace.
 		/// </summary>
 		/// <returns>The info about the namespace.</returns>
+		/// <param name="namespaceName">The namespace name.</param>
 		[HttpGet("namespaces/{namespaceName}")]
-		public async Task<IActionResult> GetNamespace()
+		public async Task<IActionResult> GetNamespace([FromRoute]string namespaceName)
 		{
-			return this.Ok(new NamespaceInfo());
+			Corev1Namespace @namespace = await this.kubernetesClient.ReadNamespaceAsync(namespaceName);
+			Corev1ServiceList services = await this.kubernetesClient.ListNamespacedServiceAsync(namespaceParameter: namespaceName, labelSelector: "application=openbrisk");
+
+			return this.Ok(new NamespaceInfo
+			{
+				Name = @namespace.Metadata.Name,
+				FunctionCount = services.Items.Count,
+			});
 		}
 
 		/// <summary>
-		///Create a new namespace.
+		/// Create a new namespace.
 		/// </summary>
 		/// <returns>The result of the namespace creation operation.</returns>
 		/// <param name="namespaceName">The namespace name.</param>
 		[HttpPost("namespaces")]
-		public async Task<IActionResult> AddNamespace([FromBody]string namespaceName)
+		public async Task<IActionResult> AddNamespace([FromRoute]string namespaceName)
 		{
+			Corev1Namespace @namespace = await this.kubernetesClient.CreateNamespaceAsync(new Corev1Namespace(metadata: new V1ObjectMeta(name: namespaceName, labels: new Dictionary<string, string> { { "application", "openbrisk" } })));
+
 			return this.CreatedAtAction("GetNamespace", "Namespaces", new { namespaceName }, namespaceName);
 		}
 	}
