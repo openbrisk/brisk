@@ -16,20 +16,12 @@
 		/// </summary>
 		/// <value><c>true</c> if the call is async; otherwise, <c>false</c>.</value>
 		[JsonProperty("async")]
-		public bool IsAsync
-		{
-			get;
-			set;
-		}
+		public bool IsAsync { get; set; }
 
 		/// <summary>
 		/// Gets or sets the data passed to the function.
 		/// </summary>
 		/// <value>The data.</value>
-		public string Data
-		{
-			get;
-			set;
-		}
+		public string Data { get; set; }
 	}
 }
