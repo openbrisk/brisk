@@ -6,7 +6,7 @@ WORKDIR /src
  COPY ./src/controller/OpenBrisk.Controller/*.csproj .
  RUN dotnet restore
 
-# Copy, restore and build solution.
+# Copy the rest and build.
 COPY ./src/controller/OpenBrisk.Controller .
 RUN dotnet restore
 RUN dotnet publish --output /app/ --configuration Release

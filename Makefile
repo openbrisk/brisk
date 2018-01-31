@@ -1,5 +1,9 @@
-.PHONY: build
+.PHONY: build controller gateway
 
-build:
-	docker build -t brisk-controller . -f controller.Dockerfile
-	docker build -t brisk-gateway . -f gateway.Dockerfile
+build: controller gateway
+
+controller:
+	docker build -t openbrisk/brisk-controller . -f controller.Dockerfile
+
+gateway:
+	docker build -t openbrisk/brisk-gateway . -f gateway.Dockerfile

@@ -6,7 +6,7 @@ WORKDIR /src
  COPY ./src/gateway/OpenBrisk.Gateway/*.csproj .
  RUN dotnet restore
 
-# Copy, restore and build solution.
+# Copy the rest and build.
 COPY ./src/gateway/OpenBrisk.Gateway .
 RUN dotnet restore
 RUN dotnet publish --output /app/ --configuration Release
