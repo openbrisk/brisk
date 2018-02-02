@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ ! -s "$TRAVIS_TAG" ] ; then
+if [ ! -z "$TRAVIS_TAG" ] ; then
 	echo "This OpenBrisk build will be published as version: ${TRAVIS_TAG}"
 fi
 

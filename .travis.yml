@@ -7,9 +7,5 @@ services:
 script:
   - make build
 
-deploy:
-  provider: script
-  script: ./publish.sh
-  on:
-    repo: openbrisk/brisk
-    tags: true
+after_success:
+  - make publish
