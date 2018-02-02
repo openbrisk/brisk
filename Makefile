@@ -1,3 +1,7 @@
-.PHONY: build publish controller gateway queue
+.PHONY: build publish
 
-build: ./build.sh
+build:
+	./build.sh
+
+publish:
+	./publish.sh	
