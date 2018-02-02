@@ -1,13 +1,15 @@
 sudo: required
+language: generic
 
 services:
   - docker
-addons:
-  apt:
-    - docker-ce
 
 script:
   - make build
 
- after_success:
-  - make publish
+deploy:
+  provider: script
+  script: ./publish.sh
+  on:
+    repo: openbrisk/brisk
+    tags: true
