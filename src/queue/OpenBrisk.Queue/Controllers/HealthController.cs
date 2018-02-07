@@ -1,4 +1,4 @@
-namespace OpenBrisk.Controller.Controllers
+namespace OpenBrisk.Queue.Controllers
 {
 	using Microsoft.AspNetCore.Mvc;
 

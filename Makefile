@@ -1,6 +1,6 @@
 .PHONY: build controller gateway queue
 
-build: controller gateway
+build: controller gateway queue
 
 controller:
 	docker build -t openbrisk/brisk-controller . -f controller.Dockerfile

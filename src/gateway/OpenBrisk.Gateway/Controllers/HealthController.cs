@@ -2,7 +2,7 @@ namespace OpenBrisk.Gateway.Controllers
 {
 	using Microsoft.AspNetCore.Mvc;
 
-	[Route("gateway")]
+	[Route("/")]
 	public class HealthController : Controller
 	{
 		[HttpGet("healthz")]
