@@ -80,6 +80,10 @@
 		[HttpPost("functions")]
 		public async Task<IActionResult> AddFunction([FromBody]FunctionDescriptor functionDescriptor)
 		{
+			// TODO: Create Deployment and Service for function.
+			// TODO: Store code and dependencies files in ConfigMap
+			// TODO: Connect ConfigMap to Pods
+
 			return this.Ok(null);
 		}
 
