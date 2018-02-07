@@ -3,11 +3,11 @@ FROM microsoft/aspnetcore-build as builder
 WORKDIR /src
 
  # Caches restore result by copying csproj file separately
- COPY ./src/gateway/OpenBrisk.Queue/*.csproj .
+ COPY ./src/queue/OpenBrisk.Queue/*.csproj .
  RUN dotnet restore
 
 # Copy the rest and build.
-COPY ./src/gateway/OpenBrisk.Queue .
+COPY ./src/queue/OpenBrisk.Queue .
 RUN dotnet restore
 RUN dotnet publish --output /app/ --configuration Release
 

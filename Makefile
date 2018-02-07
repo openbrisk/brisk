@@ -1,12 +1,7 @@
-.PHONY: build controller gateway queue
+.PHONY: build publish
 
-build: controller gateway queue
+build:
+	./build.sh
 
-controller:
-	docker build -t openbrisk/brisk-controller . -f controller.Dockerfile
-
-gateway:
-	docker build -t openbrisk/brisk-gateway . -f gateway.Dockerfile
-
-queue:
-	docker build -t openbrisk/brisk-queue . -f queue.Dockerfile
+publish:
+	./publish.sh	
