@@ -7,7 +7,7 @@
 		public FunctionInvocationDescriptor()
 		{
 			this.IsAsync = false;
-			this.Callback = string.Empty;
+			this.Forward = string.Empty;
 			this.Data = string.Empty;
 		}
 
@@ -20,10 +20,10 @@
 		public bool IsAsync { get; set; }
 
 		/// <summary>
-		/// A callback url where the result of the function is posted to.
+		/// A url where the result of the function is posted to.
 		/// </summary>
-		/// <value>The callback url.</value>
-		public string Callback { get; set; }
+		/// <value>The forward url.</value>
+		public string Forward { get; set; }
 
 		/// <summary>
 		/// Gets or sets the data passed to the function.
