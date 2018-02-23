@@ -1,62 +1,126 @@
 ﻿namespace OpenBrisk.Gateway.Controllers
 {
 	using System;
-	using System.Linq;
 	using System.Net.Http;
 	using System.Threading.Tasks;
+	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.Extensions.Primitives;
-	using OpenBrisk.Gateway.Model;
+	using Service;
 
-	[Route("gateway/v1")]
+	[Route("")]
 	public class GatewayController : Controller
 	{
-		private static Lazy<HttpClient> client = new Lazy<HttpClient>(() =>
-		{
-			return new HttpClient
-			{
+		private readonly IKubernetesService kubernetesService;
 
-			};
-		});
+		private const string ServicesUrl = "cluster.local";
+		private static readonly Lazy<HttpClient> client = new Lazy<HttpClient>(() => new HttpClient());
+
+		public GatewayController(IKubernetesService kubernetesService)
+		{
+			this.kubernetesService = kubernetesService;
+		}
 
 		/// <summary>
 		/// Invoke a deployed function.
 		/// </summary>
 		/// <returns>The result of the invoked function.</returns>
-		/// <param name="functionInvocationDescriptor">The function invocation descriptor.</param>
 		[HttpPost("functions/{namespaceName}/{functionName}")]
-		public async Task<IActionResult> InvokeFunction([FromRoute]string namespaceName, [FromRoute]string functionName,
-														[FromBody]FunctionInvocationDescriptor functionInvocationDescriptor)
+		[HttpGet("functions/{namespaceName}/{functionName}")]
+		public async Task<IActionResult> InvokeFunction([FromRoute]string namespaceName, [FromRoute]string functionName)
 		{
-			// Read async control header: X-OpenBrisk-Async: true|false
-			bool executeAsync = false;
-			if (this.Request.Headers.TryGetValue("X-OpenBrisk-Async", out StringValues asyncValues))
+			// Validate function invocation request.
+			if (!this.FunctionExsist(functionName, namespaceName))
 			{
-				if (bool.TryParse(asyncValues.FirstOrDefault(), out bool asyncValue))
-				{
-					executeAsync = asyncValue;
-				}
+				return this.NotFound($"/{namespaceName}/{functionName}");
 			}
+
+			// Read async control header: X-OpenBrisk-Async: true|false
+			bool executeAsync = this.Request.Headers.GetAsync();
 
 			// Read forward control header: X-OpenBrisk-Forward: url
-			string forwardUrl = null;
-			if (this.Request.Headers.TryGetValue("X-OpenBrisk-Forward", out StringValues forwardValues))
-			{
-				forwardUrl = forwardValues.FirstOrDefault();
-			}
+			string forwardUrl = this.Request.Headers.GetForwardUrl();
 
-			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "");
-			request.Headers.Add("X-OpenBrisk-Function-ID", Guid.NewGuid().ToString("N"));
-			//request.Headers.Add("");
+			// Read forwarded from info header: X-OpenBrisk-Forwarded-Form: function (/default/base64)
+			string forwardedFrom = this.Request.Headers.GetForwardedFromFunction();
 
-			if (functionInvocationDescriptor.IsAsync)
+			// Read function traceid  header: X-OpenBrisk-Function-ID: guid
+			string functionTraceId = this.Request.Headers.GetFunctionTraceId();
+
+			// Create the uri where the request is proxied to. // TODO: Config via ENV
+			Uri targetUri = executeAsync
+				? new Uri($"http://localhost:8003/queue/v1/functions/{namespaceName}/{functionName}")	// Queue
+				: new Uri($"http://{functionName}.{namespaceName}.{ServicesUrl}:8080");					// Function 
+
+			// Create the proxy request.
+			HttpRequestMessage request = this.CreateProxyRequest(targetUri, executeAsync ? forwardUrl : null, functionTraceId, forwardedFrom);
+			HttpResponseMessage response = await client.Value.SendAsync(request);
+
+			StatusCodeResult result = this.StatusCode((int) response.StatusCode);
+
+			if (response.IsSuccessStatusCode)
 			{
-				return this.Accepted();
+				
 			}
 			else
 			{
+
+			}
+
+			if (executeAsync)
+			{
+				return this.StatusCode((int)response.StatusCode); // 201 Accepted
+			}
+			else
+			{
+
 				return this.Ok();
 			}
+		}
+
+		private HttpRequestMessage CreateProxyRequest(Uri targetUri, string forwardUrl, string functionTraceId, string forwardedFrom)
+		{
+			HttpMethod httpMethod = this.GetHttpMethod();
+			HttpRequestMessage requestMessage = new HttpRequestMessage(httpMethod, targetUri);
+
+			// Copy request body.
+			if (httpMethod == HttpMethod.Post)
+			{
+				StreamContent streamContent = new StreamContent(this.Request.Body);
+				requestMessage.Content = streamContent;
+			}
+
+			// Set request headers.
+			requestMessage.Headers.Add("X-OpenBrisk-Function-ID", functionTraceId);
+			if (!string.IsNullOrWhiteSpace(forwardUrl))
+			{
+				requestMessage.Headers.Add("X-OpenBrisk-Forward", forwardUrl);
+			}
+			if (!string.IsNullOrWhiteSpace(forwardedFrom))
+			{
+				requestMessage.Headers.Add("X-OpenBrisk-Forwarded-Form", forwardedFrom);
+			}
+
+			return requestMessage;
+		}
+
+		private HttpMethod GetHttpMethod()
+		{
+			if (HttpMethods.IsGet(this.Request.Method))
+			{
+				return HttpMethod.Get;
+			}
+			if (HttpMethods.IsPost(this.Request.Method))
+			{
+				return HttpMethod.Post;
+			}
+
+			throw new InvalidOperationException($"Unknown http method: {this.Request.Method}");
+		}
+
+		private bool FunctionExsist(string functionName, string namespaceName)
+		{
+			return true;
+			throw new NotImplementedException();
 		}
 	}
 }

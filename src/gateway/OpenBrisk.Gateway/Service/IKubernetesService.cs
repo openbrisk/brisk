@@ -1,4 +1,4 @@
-﻿namespace Openbrisk.Controller.Services
+﻿namespace OpenBrisk.Gateway.Service
 {
 	public interface IKubernetesService
 	{

@@ -26,7 +26,7 @@
 		[HttpGet("functions")]
 		public async Task<IActionResult> GetFunctions()
 		{
-			Corev1ServiceList services = await this.kubernetesClient.ListServiceForAllNamespacesAsync(labelSelector: "application=openbrisk");
+			V1ServiceList services = await this.kubernetesClient.ListServiceForAllNamespacesAsync(labelSelector: "application=openbrisk");
 
 			return this.Ok(services.Items.Select(x => new FunctionInfo
 			{
@@ -47,7 +47,7 @@
 		[HttpGet("functions/{namespaceName}")]
 		public async Task<IActionResult> GetFunctions([FromRoute]string namespaceName)
 		{
-			Corev1ServiceList services = await this.kubernetesClient.ListNamespacedServiceAsync(namespaceName, labelSelector: "application=openbrisk");
+			V1ServiceList services = await this.kubernetesClient.ListNamespacedServiceAsync(namespaceName, labelSelector: "application=openbrisk");
 
 			return this.Ok(services.Items.Select(x => new FunctionInfo
 			{

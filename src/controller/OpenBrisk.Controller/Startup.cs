@@ -6,6 +6,7 @@
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.DependencyInjection;
 	using Newtonsoft.Json.Converters;
+	using Openbrisk.Controller.Services;
 
 	public class Startup
 	{
@@ -19,11 +20,12 @@
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddSingleton<IKubernetes>(serviceLocator =>
+			services.AddSingleton<IKubernetes>(serviceProvider =>
 			{
 				KubernetesClientConfiguration config = KubernetesClientConfiguration.InClusterConfig();
 				return new Kubernetes(config);
 			});
+			services.AddSingleton<IKubernetesService, KubernetesService>();
 
 			services.AddMvc()
 					.AddJsonOptions(setup =>

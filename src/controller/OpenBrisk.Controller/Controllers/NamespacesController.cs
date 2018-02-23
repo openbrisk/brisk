@@ -25,7 +25,7 @@
 		[HttpGet("namespaces")]
 		public async Task<IActionResult> GetNamespaces()
 		{
-			Corev1NamespaceList namespaces = await this.kubernetesClient.ListNamespaceAsync(labelSelector: "application=openbrisk");
+			V1NamespaceList namespaces = await this.kubernetesClient.ListNamespaceAsync(labelSelector: "application=openbrisk");
 			return this.Ok(namespaces.Items.Select(x => x.Metadata.Name));
 		}
 
@@ -37,8 +37,8 @@
 		[HttpGet("namespaces/{namespaceName}")]
 		public async Task<IActionResult> GetNamespace([FromRoute]string namespaceName)
 		{
-			Corev1Namespace @namespace = await this.kubernetesClient.ReadNamespaceAsync(namespaceName);
-			Corev1ServiceList services = await this.kubernetesClient.ListNamespacedServiceAsync(namespaceParameter: namespaceName, labelSelector: "application=openbrisk");
+			V1Namespace @namespace = await this.kubernetesClient.ReadNamespaceAsync(namespaceName);
+			V1ServiceList services = await this.kubernetesClient.ListNamespacedServiceAsync(namespaceParameter: namespaceName, labelSelector: "application=openbrisk");
 
 			return this.Ok(new NamespaceInfo
 			{
@@ -55,7 +55,7 @@
 		[HttpPost("namespaces")]
 		public async Task<IActionResult> AddNamespace([FromRoute]string namespaceName)
 		{
-			Corev1Namespace @namespace = await this.kubernetesClient.CreateNamespaceAsync(new Corev1Namespace(metadata: new V1ObjectMeta(name: namespaceName, labels: new Dictionary<string, string> { { "application", "openbrisk" } })));
+			V1Namespace @namespace = await this.kubernetesClient.CreateNamespaceAsync(new V1Namespace(metadata: new V1ObjectMeta(name: namespaceName, labels: new Dictionary<string, string> { { "application", "openbrisk" } })));
 
 			return this.CreatedAtAction("GetNamespace", "Namespaces", new { namespaceName }, namespaceName);
 		}

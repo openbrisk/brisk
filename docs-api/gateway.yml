@@ -9,7 +9,7 @@ info:
     email: info@openbrisk.org
   license:
     name: MIT
-basePath: /gateway/v1
+basePath: /
 schemes:
   - http
 paths:

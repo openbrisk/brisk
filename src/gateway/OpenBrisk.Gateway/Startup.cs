@@ -12,11 +12,15 @@ using Newtonsoft.Json.Converters;
 
 namespace OpenBrisk.Gateway
 {
+	using k8s;
+	using Service;
+	using Services;
+
 	public class Startup
 	{
 		public Startup(IConfiguration configuration)
 		{
-			Configuration = configuration;
+			this.Configuration = configuration;
 		}
 
 		public IConfiguration Configuration { get; }
@@ -24,6 +28,13 @@ namespace OpenBrisk.Gateway
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddSingleton<IKubernetes>(serviceProvider =>
+			{
+				KubernetesClientConfiguration config = KubernetesClientConfiguration.InClusterConfig();
+				return new Kubernetes(config);
+			});
+			services.AddSingleton<IKubernetesService, KubernetesService>();
+
 			services.AddMvc()
 					.AddJsonOptions(setup =>
 					{
