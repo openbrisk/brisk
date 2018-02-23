@@ -1,19 +1,26 @@
 ﻿namespace OpenBrisk.Gateway.Controllers
 {
 	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
 	using System.Net.Http;
 	using System.Threading.Tasks;
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
-	using Service;
+    using OpenBrisk.Gateway.Services;
 
-	[Route("")]
+    [Route("")]
 	public class GatewayController : Controller
 	{
 		private readonly IKubernetesService kubernetesService;
 
 		private const string ServicesUrl = "cluster.local";
-		private static readonly Lazy<HttpClient> client = new Lazy<HttpClient>(() => new HttpClient());
+		private static readonly Lazy<HttpClient> client = new Lazy<HttpClient>(() => new HttpClient(new HttpClientHandler
+		{
+			AllowAutoRedirect = false,
+			UseCookies = false
+		}));
 
 		public GatewayController(IKubernetesService kubernetesService)
 		{
@@ -22,6 +29,8 @@
 
 		/// <summary>
 		/// Invoke a deployed function.
+		/// 
+		/// Note: https://github.com/aspnet/Proxy
 		/// </summary>
 		/// <returns>The result of the invoked function.</returns>
 		[HttpPost("functions/{namespaceName}/{functionName}")]
@@ -46,35 +55,25 @@
 			// Read function traceid  header: X-OpenBrisk-Function-ID: guid
 			string functionTraceId = this.Request.Headers.GetFunctionTraceId();
 
-			// Create the uri where the request is proxied to. // TODO: Config via ENV
-			Uri targetUri = executeAsync
-				? new Uri($"http://localhost:8003/queue/v1/functions/{namespaceName}/{functionName}")	// Queue
-				: new Uri($"http://{functionName}.{namespaceName}.{ServicesUrl}:8080");					// Function 
+			// Create the uri where the request is proxied to. 
+			Uri targetUri = this.CreateTargetUri(executeAsync, namespaceName, functionName);
 
-			// Create the proxy request.
+			// Create and send the proxy request.
 			HttpRequestMessage request = this.CreateProxyRequest(targetUri, executeAsync ? forwardUrl : null, functionTraceId, forwardedFrom);
-			HttpResponseMessage response = await client.Value.SendAsync(request);
+			HttpResponseMessage response = await client.Value.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, this.HttpContext.RequestAborted);
 
-			StatusCodeResult result = this.StatusCode((int) response.StatusCode);
+			// Return the result from the upstream target.
+			return this.Proxy(response); // TODO: Forward to url if requested.
+		}
 
-			if (response.IsSuccessStatusCode)
-			{
-				
-			}
-			else
-			{
+		private Uri CreateTargetUri(bool executeAsync, string namespaceName, string functionName)
+		{
+			// TODO: Config via ENV
+			Uri targetUri = executeAsync
+				? new Uri($"http://localhost:8003/queue/v1/functions/{namespaceName}/{functionName}")   // Queue
+				: new Uri($"http://{functionName}.{namespaceName}.{ServicesUrl}:8080");                 // Function 
 
-			}
-
-			if (executeAsync)
-			{
-				return this.StatusCode((int)response.StatusCode); // 201 Accepted
-			}
-			else
-			{
-
-				return this.Ok();
-			}
+			return targetUri;
 		}
 
 		private HttpRequestMessage CreateProxyRequest(Uri targetUri, string forwardUrl, string functionTraceId, string forwardedFrom)
