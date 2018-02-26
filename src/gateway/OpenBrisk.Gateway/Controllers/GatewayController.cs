@@ -8,9 +8,9 @@
 	using System.Threading.Tasks;
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
-    using OpenBrisk.Gateway.Services;
+	using OpenBrisk.Gateway.Services;
 
-    [Route("")]
+	[Route("")]
 	public class GatewayController : Controller
 	{
 		private readonly IKubernetesService kubernetesService;
@@ -118,8 +118,7 @@
 
 		private bool FunctionExsist(string functionName, string namespaceName)
 		{
-			return true;
-			throw new NotImplementedException();
+			return true; // TODO
 		}
 	}
 }
